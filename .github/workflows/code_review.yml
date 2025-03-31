@@ -2,8 +2,7 @@ name: PR Java Code Review with ChatGPT
 
 on:
   pull_request:
-    branches:
-      - main
+
     types:
       - opened
       - synchronize
