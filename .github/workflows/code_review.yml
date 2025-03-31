@@ -3,7 +3,7 @@ name: PR Java Code Review with ChatGPT
 on:
   pull_request:
     branches:
-      - master
+      - master  # or 'main' if that's your default branch
     types:
       - opened
       - synchronize
@@ -22,17 +22,34 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
 
-      - name: Fetch all branches and the pull request base branch (master)
+      - name: Fetch all branches and the pull request base branch (master or main)
         run: |
-          # Fetch the base branch (master) and all branches
-          git fetch origin master
           git fetch --all
+          git branch -r  # List all remote branches for debugging purposes
+          git log --oneline --graph --decorate --all  # Show the commit history for debugging
 
-      - name: Get the merge base between master and PR branch
+      - name: Check if master or main exists
         run: |
-          # Get the merge base commit between origin/master and the PR branch (HEAD)
-          MERGE_BASE=$(git merge-base origin/master HEAD)
+          # Check if master or main is available
+          git branch -r | grep "origin/master" || git branch -r | grep "origin/main"
+
+      - name: Get the merge base between master (or main) and PR branch
+        run: |
+          # Check if we are using the correct branch name
+          if git branch -r | grep -q "origin/master"; then
+            BASE_BRANCH="origin/master"
+          else
+            BASE_BRANCH="origin/main"
+          fi
+
+          # Get the merge base commit between base branch and the PR branch (HEAD)
+          MERGE_BASE=$(git merge-base $BASE_BRANCH HEAD)
           echo "Merge base is $MERGE_BASE"
+          if [ -z "$MERGE_BASE" ]; then
+            echo "No merge base found. Exiting..."
+            exit 1
+          fi
+
           # Now generate the diff between the merge base and the current HEAD (PR branch)
           git diff --name-only $MERGE_BASE...HEAD | grep '.java$' > java_files.txt
           cat java_files.txt
