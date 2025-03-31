@@ -2,7 +2,8 @@ name: PR Java Code Review with ChatGPT
 
 on:
   pull_request:
-
+    branches:
+      - master
     types:
       - opened
       - synchronize
@@ -21,15 +22,19 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
 
-      - name: Fetch all branches
-        run: git fetch --all
-
-      - name: Install dependencies
-        run: mvn clean install
-
-      - name: Extract Java files from PR
+      - name: Fetch all branches and the pull request base branch (master)
         run: |
-          git diff --name-only origin/master...HEAD | grep '.java$' > java_files.txt
+          # Fetch the base branch (master) and all branches
+          git fetch origin master
+          git fetch --all
+
+      - name: Get the merge base between master and PR branch
+        run: |
+          # Get the merge base commit between origin/master and the PR branch (HEAD)
+          MERGE_BASE=$(git merge-base origin/master HEAD)
+          echo "Merge base is $MERGE_BASE"
+          # Now generate the diff between the merge base and the current HEAD (PR branch)
+          git diff --name-only $MERGE_BASE...HEAD | grep '.java$' > java_files.txt
           cat java_files.txt
 
       - name: Review Java code with ChatGPT
