@@ -3,7 +3,6 @@ name: PR Java Code Review with ChatGPT
 on:
   pull_request:
 
-
     types:
       - opened
       - synchronize
@@ -19,8 +18,11 @@ jobs:
       - name: Set up JDK 21 (Temurin)
         uses: actions/setup-java@v2
         with:
-          java-version: '21'          # Updated to Java 21
-          distribution: 'temurin'     # Using the Temurin distribution
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Fetch all branches
+        run: git fetch --all
 
       - name: Install dependencies
         run: mvn clean install
@@ -43,4 +45,13 @@ jobs:
             -H "Content-Type: application/json" \
             -d '{
               "model": "text-davinci-003",
-              "prompt": "Review the following Java code and provide
+              "prompt": "Review the following Java code and provide feedback on best practices, possible issues, and improvements:\n\n'${PR_CODE}'",
+              "max_tokens": 500
+            }')
+
+          REVIEW=$(echo $RESPONSE | jq -r '.choices[0].text')
+
+          curl -X POST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d '{"body": "### ChatGPT Review of the Java Code:\n\n'"$REVIEW"'" }' \
+            "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments"
