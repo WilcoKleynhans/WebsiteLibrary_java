@@ -49,6 +49,13 @@ public class WebsiteController {
         return updatedWebsite != null ? ResponseEntity.ok(updatedWebsite) : ResponseEntity.notFound().build();
     }
 
+    // Update an existing website
+    @PutMapping("/{memno}")
+    public ResponseEntity<Website> updateWebsiteMemNo(@PathVariable Long id, @Valid @RequestBody Website website) {
+        Website updatedWebsite = websiteService.updateWebsite(id, website);
+        return updatedWebsite != null ? ResponseEntity.ok(updatedWebsite) : ResponseEntity.notFound().build();
+    }
+
     // Delete a website
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteWebsite(@PathVariable Long id) {
