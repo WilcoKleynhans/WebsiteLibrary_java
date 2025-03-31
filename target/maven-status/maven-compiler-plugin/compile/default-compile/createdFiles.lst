@@ -1,0 +1,5 @@
+com\sandbox\websitelibrary\WebSiteLibrary\controller\WebsiteController.class
+com\sandbox\websitelibrary\WebSiteLibrary\repository\WebsiteRepository.class
+com\sandbox\websitelibrary\WebSiteLibrary\service\WebsiteService.class
+com\sandbox\websitelibrary\WebSiteLibrary\model\Website.class
+com\sandbox\websitelibrary\WebSiteLibrary\WebSiteLibraryApplication.class
