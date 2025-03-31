@@ -50,7 +50,6 @@ public class WebsiteController {
     }
 
 
-
     // Delete a website
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteWebsite(@PathVariable Long id) {
