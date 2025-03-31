@@ -3,6 +3,7 @@ name: PR Java Code Review with ChatGPT
 on:
   pull_request:
 
+
     types:
       - opened
       - synchronize
@@ -12,58 +13,34 @@ jobs:
   review:
     runs-on: ubuntu-latest
     steps:
-      # Checkout the code from the PR
       - name: Checkout code
         uses: actions/checkout@v2
 
-      # Set up Java (JDK 11)
-      - name: Set up JDK 11
+      - name: Set up JDK 21 (Temurin)
         uses: actions/setup-java@v2
         with:
-          java-version: '11'
-          distribution: 'adoptopenjdk'
+          java-version: '21'          # Updated to Java 21
+          distribution: 'temurin'     # Using the Temurin distribution
 
-      # Install dependencies (optional if needed for the Java app)
       - name: Install dependencies
-        run: |
-          mvn clean install
+        run: mvn clean install
 
-      # Extract Java code from the PR
       - name: Extract Java files from PR
         run: |
-          # Fetch the list of Java files in the PR and save them to a file
-          git diff --name-only origin/main...HEAD | grep '.java$' > java_files.txt
+          git diff --name-only origin/master...HEAD | grep '.java$' > java_files.txt
           cat java_files.txt
 
-      # Call ChatGPT to review the Java code
       - name: Review Java code with ChatGPT
         run: |
-          # Create a script that calls the OpenAI API to review the Java code
-          # This assumes the JAVA files are extracted into the `java_files.txt`
-
-          # Prepare the files content (this is a simplified approach for now)
           PR_CODE=""
           while read -r file; do
-            # Extract the content of each Java file in the PR
             PR_CODE+=$(cat $file)
-            PR_CODE+=$'\n\n'  # Separate files by two newlines
+            PR_CODE+=$'\n\n'
           done < java_files.txt
 
-          # Review the Java code with OpenAI API (ChatGPT)
           RESPONSE=$(curl -X POST https://api.openai.com/v1/completions \
             -H "Authorization: Bearer ${{ secrets.OPENAI_API_KEY }}" \
             -H "Content-Type: application/json" \
             -d '{
               "model": "text-davinci-003",
-              "prompt": "Review the following Java code and provide feedback on best practices, possible issues, and improvements:\n\n'${PR_CODE}'",
-              "max_tokens": 500
-            }')
-
-          # Extract the review from the response
-          REVIEW=$(echo $RESPONSE | jq -r '.choices[0].text')
-
-          # Post the review as a comment on the PR
-          curl -X POST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            -H "Content-Type: application/json" \
-            -d '{"body": "### ChatGPT Review of the Java Code:\n\n'"$REVIEW"'" }' \
-            "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments"
+              "prompt": "Review the following Java code and provide
