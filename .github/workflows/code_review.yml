@@ -83,11 +83,12 @@ jobs:
 
           # Build JSON safely using jq
           JSON=$(jq -n \
-            --arg model "text-davinci-003" \
+            --arg model "gpt-3.5-turbo-instruct" \
             --arg prompt "Review the following Java code and provide feedback on best practices, possible issues, and improvements:\n\n$PR_CODE" \
             --argjson max_tokens 500 \
-            '{model: $model, prompt: $prompt, max_tokens: $max_tokens}')
-
+          '{model: $model, prompt: $prompt, max_tokens: $max_tokens}')
+  
+  
           echo "Sending the following payload to OpenAI:"
           echo "$JSON"
 
