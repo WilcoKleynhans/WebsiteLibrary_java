@@ -70,22 +70,31 @@ jobs:
         run: |
           PR_CODE=""
           while read -r file; do
-            PR_CODE+=$(cat $file)
+            PR_CODE+=$(cat "$file")
             PR_CODE+=$'\n\n'
           done < java_files.txt
 
-          RESPONSE=$(curl -X POST https://api.openai.com/v1/completions \
-            -H "Authorization: Bearer ${{ secrets.OPENAI_API_KEY }}" \
-            -H "Content-Type: application/json" \
-            -d '{
-              "model": "text-davinci-003",
-              "prompt": "Review the following Java code and provide feedback on best practices, possible issues, and improvements:\n\n'${PR_CODE}'",
-              "max_tokens": 500
-            }')
+          # Escape double quotes and backslashes in PR_CODE
+          ESCAPED_CODE=$(echo "$PR_CODE" | sed 's/\\/\\\\/g' | sed 's/"/\\"/g')
 
-          REVIEW=$(echo $RESPONSE | jq -r '.choices[0].text')
-
+          # Construct the payload safely
+          JSON_PAYLOAD=$(cat <<EOF
+          {
+            "model": "text-davinci-003",
+            "prompt": "Review the following Java code and provide feedback on best practices, possible issues, and improvements:\\n\\n$ESCAPED_CODE",
+            "max_tokens": 500
+          }
+          EOF
+          )
+      
+          RESPONSE=$(curl -s -X POST https://api.openai.com/v1/completions \
+          -H "Authorization: Bearer ${{ secrets.OPENAI_API_KEY }}" \
+          -H "Content-Type: application/json" \
+          -d "$JSON_PAYLOAD")
+      
+          REVIEW=$(echo "$RESPONSE" | jq -r '.choices[0].text')
+      
           curl -X POST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            -H "Content-Type: application/json" \
-            -d '{"body": "### ChatGPT Review of the Java Code:\n\n'"$REVIEW"'" }' \
-            "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments"
+          -H "Content-Type: application/json" \
+          -d "{\"body\": \"### ChatGPT Review of the Java Code:\n\n$REVIEW\"}" \
+          "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments"
