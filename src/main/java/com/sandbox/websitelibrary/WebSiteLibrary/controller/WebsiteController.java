@@ -56,4 +56,16 @@ public class WebsiteController {
         boolean isDeleted = websiteService.deleteWebsite(id);
         return isDeleted ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
     }
+
+    public void test() {
+        int x = 9;
+
+        String test = "";
+
+        if (1 > 2) {
+            System.out.println("??");
+        }
+    }
+
+
 }
