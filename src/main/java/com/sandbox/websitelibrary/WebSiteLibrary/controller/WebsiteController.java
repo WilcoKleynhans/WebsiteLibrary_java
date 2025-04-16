@@ -59,11 +59,15 @@ public class WebsiteController {
 
     public void test() {
         int x = 9;
+        int age = 2;
+
 
         String test = "";
 
         if (1 > 2) {
             System.out.println("??");
+        } else {
+            System.out.println("huh");
         }
     }
 
