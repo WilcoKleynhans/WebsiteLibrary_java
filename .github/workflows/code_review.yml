@@ -97,6 +97,9 @@ jobs:
           -H "Content-Type: application/json" \
           -d "$JSON_PAYLOAD")
       
+          echo "Full OpenAI API response:"
+          echo "$RESPONSE"
+      
           REVIEW=$(echo "$RESPONSE" | jq -r '.choices[0].text')
       
           curl -X POST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
