@@ -40,9 +40,9 @@ jobs:
         run: |
           # Check if we are working with master or main
           if git branch -r | grep -q "origin/master"; then
-            BASE_BRANCH="origin/master"
-          elif git branch -r | grep -q "origin/main"; then
-            BASE_BRANCH="origin/main"
+            BASE_BRANCH="master"
+            elif git branch -r | grep -q "origin/main"; then
+          BASE_BRANCH="main"
           else
             echo "Error: Neither master nor main branch found in remote."
             exit 1
