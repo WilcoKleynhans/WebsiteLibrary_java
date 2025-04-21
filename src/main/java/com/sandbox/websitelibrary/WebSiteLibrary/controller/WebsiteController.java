@@ -72,4 +72,15 @@ public class WebsiteController {
     }
 
 
+    public void dummy() {
+        if (1 > 2) {
+            System.out.println("??");
+        } else {
+            System.out.println("huh");
+        }
+
+        String color = "blue";
+    }
+
+
 }
